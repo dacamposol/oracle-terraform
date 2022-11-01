@@ -27,3 +27,16 @@ variable user_rsa_fingerprint {
   type = string
   sensitive = true
 }
+
+variable argo_cd_version {
+  description = "Value of the ArgoCD version to be deployed"
+  type = string
+  default = "2.5.0"
+}
+
+variable argo_cd_namespace {
+  description = "Value of the Kubernetes namespace where to deploy ArgoCD resources"
+  type = string
+  default = "argo"
+}
+

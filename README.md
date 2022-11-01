@@ -1,8 +1,16 @@
 # Oracle OKE Terraform
 
-This repository contains the required Terraform scripts to set up K8s using OKE in the Oracle Free Tier.
+This repository contains the **Terraform** scripts to bootstrap a Kubernetes Cluster in the **Oracle Cloud Infrastructure Free Tier** with **Oracle Kubernetes Engine (OKE)**.
+
+Additionally, **ArgoCD** will be installed in the bootstrapped cluster for GitOps management of the cluster resources.
 
 ## Requirements
+
+### Variables
+
+This variables don't have default declared values and are required to be provided to the scripts.
+
+Create a `.tfvars` file in the root folder of this repository with the following variables declared:
 
 | Variable | Definition |
 | -------- | ---------------- |
@@ -12,21 +20,13 @@ This repository contains the required Terraform scripts to set up K8s using OKE 
 | `user_rsa_path` | Path where we store the generated RSA key, better to use `~/.oci/oci-rsa.pem` |
 | `user_rsa_fingerprint` | After generating the RSA Keys, we can consult the fingerprint in the Oracle Cloud Console |
 
-### OCI CLI
+Other variables, which are not mandatory, can be provided in this file as well. For a complete description of all the variables, check the contents on the [variables.tf file](variables.tf).
 
-We will require from the OCI CLI to access to our created Kubernetes Cluster, so this should be installed.
+### Oracle Cloud Infrastructure (OCI) Access
 
-Instructions on how to install the OCI CLI for different environments can be found [here](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm).
+In order to be able to perform operations against OCI, we need to create and import an RSA Key for API signing.
 
-### Kubectl
-
-In order to interact with our K8s Cluster using the Kubernetes API, we require the command-line tool for Kubernetes: `kubectl`.
-
-How to install it in different environments is available in [here](https://kubernetes.io/docs/tasks/tools/#kubectl)
-
-### RSA Keys
-
-In order to be able to run this scripts against OCI (Oracle Cloud Infrastructure), you have to create and import RSA Keys for API signing.
+This can be easily performed with the following steps:
 
 1. Make an `.oci` directory on your home folder:
 
@@ -55,7 +55,13 @@ $ cat $HOME/.oci/oci-rsa-public.pem
 
 5. Add the public key to your OCI user account from `User Settings > API Keys`
 
-6. Modify the file under `$HOME/.oci/config` and add the following keys:
+### Oracle Cloud Infrastructure (OCI) CLI
+
+We need a correctly configured OCI CLI to log against our to-be-created Kubernetes Cluster, as we will use the K8s login plugin to get a JWT for access.
+
+Instructions on how to install the OCI CLI for different environments can be found [here](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm).
+
+Once we have installed the tool, we need to configure it to use the previously generated RSA Key to interact with out OCI Tenancy. In order to do that, we are going to create (or modify if it has been automatically created) the file `$HOME/.oci/config` with the following keys:
 
 ```text
 tenancy=<tenancy_ocid>
@@ -65,6 +71,15 @@ key_file=<user_rsa_path>
 fingerprint=<user_rsa_fingerprint>
 ```
 
+How to retrieve these values is explained in the [variables section](#variables).
+
+### Kubernetes Command-Line Tool
+
+In order to interact with our K8s Cluster using the Kubernetes API, we require a Kubernetes CLI; at this point, it's on your choice whether to use install the official CLI from Kubernetes (`kubectl`) or some other CLI tool as K9s (as I personally use).
+
+- How to install `kubectl` in different environments is available in [here](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- How to install `k9s` in different environments is available in [here](https://k9scli.io/topics/install/)
+
 ## Usage
 
 First, override all the variables by using a file in the root directory of our Terraform scripts with the defined variables in the [Requirement](#requirements) section with the name `env.tfvars`.
@@ -72,21 +87,23 @@ First, override all the variables by using a file in the root directory of our T
 Then, in order to create the cluster, just run the following:
 
 ```shell
-terraform apply -var-file="env.tfvars"
+$ terraform apply -var-file="env.tfvars"
 ```
 
 Check that everything is correct, and type `yes` on the required input. In some minutes, the cluster will be ready and a `kubeconfig` will be placed in the folder `generated`.
 
-In order to start using this cluster, you can just:
-
-- Move the kubeconfig to the default location of `$HOME/.kube/config`
+In order to start using this cluster, you can just export the `KUBECONFIG` environment variable to our current location and use your desired Kubernetes CLI Tool.
 
 ```shell
-mv /generated/kubeconfig ~/.kube/config
+$ export KUBECONFIG=$(pwd)/generated/kubeconfig
+$ k9s
 ```
 
-- Export the `KUBECONFIG` environment variable to our current location
+## Author
 
-```shell
-export KUBECONFIG=$(pwd)/generated/kubeconfig
-```
+Daniel Campos Olivares, 2022
+
+**Links:**
+- [StackOverflow](https://stackoverflow.com/users/8951571/daniel-campos-olivares)
+- [Twitter](https://www.twitter.com/devcamposol/)
+- [LinkedIn](https://www.linkedin.com/in/dacamposol/)
