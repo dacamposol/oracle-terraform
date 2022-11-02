@@ -105,5 +105,5 @@ Daniel Campos Olivares, 2022
 
 **Links:**
 - [StackOverflow](https://stackoverflow.com/users/8951571/daniel-campos-olivares)
-- [Twitter](https://www.twitter.com/devcamposol/)
+- [Twitter](https://www.twitter.com/dacamposol/)
 - [LinkedIn](https://www.linkedin.com/in/dacamposol/)

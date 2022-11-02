@@ -31,3 +31,31 @@ resource "k8s_manifest" "argo" {
     kubernetes_namespace.argo
   ]
 }
+
+resource "k8s_manifest" "apps-infra" {
+  content = <<-EOF
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            metadata:
+              name: infra
+              namespace: ${var.argo_cd_namespace}
+              finalizers:
+              - resources-finalizer.argocd.argoproj.io
+            spec:
+              destination:
+                namespace: ${var.argo_cd_namespace}
+                server: "https://kubernetes.default.svc"
+              project: default
+              source:
+                path: ${var.argo_cd_gitops_infra_app}
+                repoURL: ${var.argo_cd_gitops_repo}
+                targetRevision: HEAD
+              syncPolicy:
+                automated:
+                  prune: true
+            EOF
+  namespace = var.argo_cd_namespace
+  depends_on = [
+    k8s_manifest.argo
+  ]
+}
